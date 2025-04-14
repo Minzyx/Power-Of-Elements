@@ -6,6 +6,9 @@ public class FirstPersonController : MonoBehaviour
 {
     [Header("Movimentação")]
     public float speed = 6f;
+    public float velocidadeCorrendo = 12f;
+    private bool podeCorrer = false;
+
     private float originalSpeed;
     private float boostTimer = 0f;
 
@@ -41,7 +44,6 @@ public class FirstPersonController : MonoBehaviour
 
     void Update()
     {
-        // BOOST: reduz tempo e volta à velocidade normal
         if (boostTimer > 0)
         {
             boostTimer -= Time.deltaTime;
@@ -51,7 +53,6 @@ public class FirstPersonController : MonoBehaviour
             }
         }
 
-        // Checar se está no chão
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
         if (isGrounded)
@@ -61,17 +62,23 @@ public class FirstPersonController : MonoBehaviour
 
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f; // manter o personagem no chão
+            velocity.y = -2f;
         }
 
-        // Movimento
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
         Vector3 move = transform.right * x + transform.forward * z;
-        controller.Move(move * speed * Time.deltaTime);
 
-        // Pulo
+        float velocidadeAtual = speed;
+
+        if (podeCorrer && Input.GetKey(KeyCode.LeftShift))
+        {
+            velocidadeAtual = velocidadeCorrendo;
+        }
+
+        controller.Move(move * velocidadeAtual * Time.deltaTime);
+
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
@@ -86,11 +93,9 @@ public class FirstPersonController : MonoBehaviour
             }
         }
 
-        // Gravidade
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
 
-        // Mouse Look
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity * Time.deltaTime;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity * Time.deltaTime;
 
@@ -100,7 +105,6 @@ public class FirstPersonController : MonoBehaviour
         cameraTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
         transform.Rotate(Vector3.up * mouseX);
 
-        // Vida
         if (currenthealth <= 0)
         {
             Destroy(this.gameObject);
@@ -108,17 +112,20 @@ public class FirstPersonController : MonoBehaviour
         }
     }
 
-    // BOOST TEMPORÁRIO
     public void AtivarBoostVelocidade(float novaVelocidade, float duracao)
     {
         speed = novaVelocidade;
         boostTimer = duracao;
     }
 
-    // BOOST PERMANENTE
     public void SetVelocidadePermanente(float novaVelocidade)
     {
         speed = novaVelocidade;
         originalSpeed = novaVelocidade;
+    }
+
+    public void HabilitarCorrida()
+    {
+        podeCorrer = true;
     }
 }

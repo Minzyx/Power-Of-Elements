@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class SpeedBoost : MonoBehaviour
 {
-    public float novaVelocidade = 12f;
     public AudioClip somColeta;
 
     private void OnTriggerEnter(Collider other)
@@ -12,9 +11,8 @@ public class SpeedBoost : MonoBehaviour
             FirstPersonController player = other.GetComponent<FirstPersonController>();
             if (player != null)
             {
-                player.SetVelocidadePermanente(novaVelocidade);
+                player.HabilitarCorrida(); // Agora o player corre com Shift
 
-                // Toca o som da coleta
                 if (somColeta != null)
                 {
                     AudioSource.PlayClipAtPoint(somColeta, transform.position);
